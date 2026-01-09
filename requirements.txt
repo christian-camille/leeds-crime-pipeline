@@ -1,0 +1,7 @@
+numpy
+pandas
+requests
+shapely
+tqdm
+pytest
+pytest-timeout

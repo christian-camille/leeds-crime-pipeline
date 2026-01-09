@@ -1,0 +1,13 @@
+# Virtual environment
+venv/
+
+# Pytest cache
+.pytest_cache/
+
+# Data folders - ignore contents but keep .gitkeep files
+data/archive/*
+!data/archive/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
