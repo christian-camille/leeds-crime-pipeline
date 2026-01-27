@@ -255,7 +255,9 @@ select:focus {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .loading-overlay p {
@@ -295,11 +297,136 @@ select:focus {
     border-radius: 0 0 var(--radius-sm) var(--radius-sm) !important;
 }
 
+.toggle-group {
+    margin-bottom: 24px;
+}
+
+.control-group .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    flex-direction: row;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 0;
+}
+
+.control-group .toggle-label input {
+    display: none;
+}
+
+.toggle-slider {
+    width: 44px;
+    min-width: 44px;
+    height: 24px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    position: relative;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: var(--transition);
+}
+
+.toggle-label input:checked+.toggle-slider {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.toggle-label input:checked+.toggle-slider::before {
+    transform: translateX(20px);
+    background: white;
+}
+
+.toggle-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.toggle-label input:checked~.toggle-text {
+    color: var(--text-primary);
+}
+
+.chart-panel {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+.chart-panel h3 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+#wards-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ward-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ward-name {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    width: 100px;
+    flex-shrink: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.ward-bar-container {
+    flex: 1;
+    height: 20px;
+    background: var(--bg-input);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.ward-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #8b5cf6);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.ward-count {
+    font-size: 0.7rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    width: 50px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
     .app-container {
         flex-direction: column;
     }
-    
+
     .sidebar {
         width: 100%;
         min-width: unset;
@@ -308,12 +435,16 @@ select:focus {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
     }
-    
+
     .controls {
         padding: 16px;
     }
-    
+
     .stats-panel {
         padding: 12px 16px;
+    }
+
+    .chart-panel {
+        display: none;
     }
 }

@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leeds Crime Heatmap</title>
-    <meta name="description" content="Interactive heatmap visualization of crime data in Leeds, UK. Filter by crime type and date range.">
-    
+    <meta name="description"
+        content="Interactive heatmap visualization of crime data in Leeds, UK. Filter by crime type and date range.">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2">
 </head>
+
 <body>
     <div class="app-container">
         <aside class="sidebar">
@@ -72,6 +75,14 @@
                     </div>
                 </div>
 
+                <div class="control-group toggle-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="exclude-city-centre">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Exclude City Centre</span>
+                    </label>
+                </div>
+
                 <button id="apply-filters" class="btn-primary">Apply Filters</button>
                 <button id="reset-filters" class="btn-secondary">Reset</button>
             </div>
@@ -85,6 +96,11 @@
                     <span class="stat-value" id="date-range">-</span>
                     <span class="stat-label">Date Range</span>
                 </div>
+            </div>
+
+            <div class="chart-panel">
+                <h3>Top 5 Wards</h3>
+                <div id="wards-chart"></div>
             </div>
 
             <footer class="sidebar-footer">
@@ -105,4 +121,5 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>

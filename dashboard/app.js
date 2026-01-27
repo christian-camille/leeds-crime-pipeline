@@ -62,35 +62,78 @@ function populateFilters() {
     document.getElementById('month-end').value = '12';
 }
 
-function applyFilters() {
-    const crimeType = document.getElementById('crime-type').value;
-    const yearStart = parseInt(document.getElementById('year-start').value);
-    const yearEnd = parseInt(document.getElementById('year-end').value);
-    const monthStart = parseInt(document.getElementById('month-start').value);
-    const monthEnd = parseInt(document.getElementById('month-end').value);
+function getFilterParams() {
+    return {
+        crimeType: document.getElementById('crime-type').value,
+        yearStart: parseInt(document.getElementById('year-start').value),
+        yearEnd: parseInt(document.getElementById('year-end').value),
+        monthStart: parseInt(document.getElementById('month-start').value),
+        monthEnd: parseInt(document.getElementById('month-end').value),
+        excludeCityCentre: document.getElementById('exclude-city-centre').checked
+    };
+}
 
-    const typeIndex = crimeType === 'all' ? -1 : crimeData.t.indexOf(crimeType);
+function filterPoints(params) {
+    const typeIndex = params.crimeType === 'all' ? -1 : crimeData.t.indexOf(params.crimeType);
 
-    const filteredPoints = crimeData.p.filter(point => {
-        const [lat, lon, pType, pYear, pMonth, count] = point;
+    return crimeData.p.filter(point => {
+        const [lat, lon, pType, pYear, pMonth, count, isCityCentre] = point;
 
         if (typeIndex !== -1 && pType !== typeIndex) {
             return false;
         }
 
-        if (pYear < yearStart || pYear > yearEnd) {
+        if (params.excludeCityCentre && isCityCentre === 1) {
             return false;
         }
 
-        if (pYear === yearStart && pMonth < monthStart) {
+        if (pYear < params.yearStart || pYear > params.yearEnd) {
             return false;
         }
-        if (pYear === yearEnd && pMonth > monthEnd) {
+
+        if (pYear === params.yearStart && pMonth < params.monthStart) {
+            return false;
+        }
+        if (pYear === params.yearEnd && pMonth > params.monthEnd) {
             return false;
         }
 
         return true;
     });
+}
+
+function filterWardData(params) {
+    const typeIndex = params.crimeType === 'all' ? -1 : crimeData.t.indexOf(params.crimeType);
+
+    return crimeData.wd.filter(point => {
+        const [ward, pType, pYear, pMonth, count] = point;
+
+        if (typeIndex !== -1 && pType !== typeIndex) {
+            return false;
+        }
+
+        if (params.excludeCityCentre && ward === crimeData.cc) {
+            return false;
+        }
+
+        if (pYear < params.yearStart || pYear > params.yearEnd) {
+            return false;
+        }
+
+        if (pYear === params.yearStart && pMonth < params.monthStart) {
+            return false;
+        }
+        if (pYear === params.yearEnd && pMonth > params.monthEnd) {
+            return false;
+        }
+
+        return true;
+    });
+}
+
+function applyFilters() {
+    const params = getFilterParams();
+    const filteredPoints = filterPoints(params);
 
     const aggregated = {};
 
@@ -126,17 +169,55 @@ function applyFilters() {
         }
     }).addTo(map);
 
-    updateStats(filteredPoints, yearStart, monthStart, yearEnd, monthEnd);
+    updateStats(filteredPoints, params);
+    updateWardChart(params);
 }
 
-function updateStats(points, yearStart, monthStart, yearEnd, monthEnd) {
+function updateStats(points, params) {
     const totalCrimes = points.reduce((sum, p) => sum + p[5], 0);
     document.getElementById('total-crimes').textContent = totalCrimes.toLocaleString();
 
-    const startMonthName = MONTHS[monthStart - 1].substring(0, 3);
-    const endMonthName = MONTHS[monthEnd - 1].substring(0, 3);
+    const startMonthName = MONTHS[params.monthStart - 1].substring(0, 3);
+    const endMonthName = MONTHS[params.monthEnd - 1].substring(0, 3);
     document.getElementById('date-range').textContent =
-        `${startMonthName} ${yearStart} - ${endMonthName} ${yearEnd}`;
+        `${startMonthName} ${params.yearStart} - ${endMonthName} ${params.yearEnd}`;
+}
+
+function updateWardChart(params) {
+    const filteredWardData = filterWardData(params);
+
+    const wardTotals = {};
+    filteredWardData.forEach(point => {
+        const [ward, pType, pYear, pMonth, count] = point;
+        if (!wardTotals[ward]) {
+            wardTotals[ward] = 0;
+        }
+        wardTotals[ward] += count;
+    });
+
+    const sortedWards = Object.entries(wardTotals)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    const maxCount = sortedWards.length > 0 ? sortedWards[0][1] : 1;
+
+    const chartContainer = document.getElementById('wards-chart');
+    chartContainer.innerHTML = '';
+
+    sortedWards.forEach(([ward, count]) => {
+        const percentage = (count / maxCount) * 100;
+
+        const barDiv = document.createElement('div');
+        barDiv.className = 'ward-bar';
+        barDiv.innerHTML = `
+            <span class="ward-name" title="${ward}">${ward}</span>
+            <div class="ward-bar-container">
+                <div class="ward-bar-fill" style="width: ${percentage}%"></div>
+            </div>
+            <span class="ward-count">${count.toLocaleString()}</span>
+        `;
+        chartContainer.appendChild(barDiv);
+    });
 }
 
 function resetFilters() {
@@ -145,6 +226,7 @@ function resetFilters() {
     document.getElementById('year-end').value = crimeData.y[crimeData.y.length - 1];
     document.getElementById('month-start').value = '01';
     document.getElementById('month-end').value = '12';
+    document.getElementById('exclude-city-centre').checked = false;
     applyFilters();
 }
 
