@@ -39,8 +39,8 @@ body {
 }
 
 .sidebar {
-    width: 320px;
-    min-width: 320px;
+    width: 400px;
+    min-width: 400px;
     background: var(--bg-card);
     border-right: 1px solid var(--border-color);
     display: flex;
@@ -50,12 +50,12 @@ body {
 }
 
 .sidebar-header {
-    padding: 28px 24px 20px;
+    padding: 20px 24px 16px;
     border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: -0.02em;
     background: linear-gradient(135deg, var(--text-primary), var(--accent));
@@ -71,13 +71,13 @@ body {
 }
 
 .controls {
-    padding: 24px;
+    padding: 16px 24px;
     flex: 1;
     overflow-y: auto;
 }
 
 .control-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .control-group label {
@@ -87,12 +87,12 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 8px 12px;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
@@ -135,7 +135,7 @@ select:focus {
 .btn-primary,
 .btn-secondary {
     width: 100%;
-    padding: 14px 20px;
+    padding: 10px 16px;
     border: none;
     border-radius: var(--radius-sm);
     font-family: var(--font-family);
@@ -143,7 +143,7 @@ select:focus {
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .btn-primary {
@@ -173,11 +173,11 @@ select:focus {
 }
 
 .stats-panel {
-    padding: 20px 24px;
+    padding: 16px 16px;
     border-top: 1px solid var(--border-color);
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 8px;
 }
 
 .stat {
@@ -298,7 +298,7 @@ select:focus {
 }
 
 .toggle-group {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .control-group .toggle-label {
