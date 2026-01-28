@@ -9,6 +9,8 @@ const MONTHS = [
 
 let totalMonths = 0;
 let minDateTimestamp = 0;
+let intensitySlider;
+let maxCrimeCount = 100;
 
 async function init() {
     map = L.map('map', {
@@ -24,6 +26,19 @@ async function init() {
     try {
         const response = await fetch(`data/crime_data.json?v=${new Date().getTime()}`);
         crimeData = await response.json();
+
+        const locationCounts = {};
+        maxCrimeCount = 0;
+
+        crimeData.p.forEach(p => {
+            const key = `${p[0]},${p[1]}`;
+            const newCount = (locationCounts[key] || 0) + p[5];
+            locationCounts[key] = newCount;
+            if (newCount > maxCrimeCount) maxCrimeCount = newCount;
+        });
+
+        if (maxCrimeCount < 100) maxCrimeCount = 100;
+        if (maxCrimeCount > 5000) maxCrimeCount = 5000;
 
         populateFilters();
         applyFilters();
@@ -47,6 +62,33 @@ function populateFilters() {
     });
 
     initSlider();
+    initIntensitySlider();
+}
+
+function initIntensitySlider() {
+    const slider = document.getElementById('intensity-slider');
+
+    intensitySlider = noUiSlider.create(slider, {
+        start: [0, 90],
+        connect: true,
+        range: {
+            'min': 0,
+            'max': 100
+        },
+        step: 1,
+        tooltips: [
+            { to: (v) => `Min: ${Math.round(v)}%` },
+            { to: (v) => `Sens: ${Math.round(v)}%` }
+        ],
+        format: {
+            to: (v) => Math.round(v),
+            from: (v) => Number(v)
+        }
+    });
+
+    slider.noUiSlider.on('update', function () {
+        applyFilters();
+    });
 }
 
 function initSlider() {
@@ -168,19 +210,45 @@ function applyFilters() {
         aggregated[key].count += count;
     });
 
-    const heatPoints = Object.values(aggregated).map(p => [p.lat, p.lon, p.count]);
+    const heatPoints = [];
+    let localMax = 0;
+
+    Object.values(aggregated).forEach(p => {
+        if (p.count > localMax) localMax = p.count;
+    });
+
+    let minFilterPercent = 0;
+    let sensitivityPercent = 100;
+
+    if (intensitySlider) {
+        [minFilterPercent, sensitivityPercent] = intensitySlider.get().map(Number);
+    }
+
+    const sortedCounts = Object.values(aggregated).map(p => p.count).sort((a, b) => a - b);
+    const numPoints = sortedCounts.length;
+
+    const minFilterIndex = Math.floor((minFilterPercent / 100) * numPoints);
+    const minFilter = numPoints > 0 ? sortedCounts[Math.min(minFilterIndex, numPoints - 1)] : 0;
+
+    // Calculate saturation point from sensitivity percentile
+    const sensitivityIndex = Math.floor((sensitivityPercent / 100) * numPoints);
+    const saturationPoint = numPoints > 0 ? sortedCounts[Math.min(sensitivityIndex, numPoints - 1)] : 1;
+
+    Object.values(aggregated).forEach(p => {
+        if (p.count >= minFilter) {
+            heatPoints.push([p.lat, p.lon, p.count]);
+        }
+    });
 
     if (heatLayer) {
         map.removeLayer(heatLayer);
     }
 
-    const maxIntensity = Math.max(...heatPoints.map(p => p[2]), 1);
-
     heatLayer = L.heatLayer(heatPoints, {
-        radius: 18,
-        blur: 25,
+        radius: 25,
+        blur: 35,
         maxZoom: 15,
-        max: maxIntensity * 0.25,
+        max: saturationPoint > 0 ? saturationPoint : 1,
         gradient: {
             0.0: '#0d0887',
             0.2: '#5302a3',
@@ -252,6 +320,10 @@ function resetFilters() {
 
     const slider = document.getElementById('date-slider');
     slider.noUiSlider.set([0, totalMonths - 1]);
+
+    if (intensitySlider) {
+        intensitySlider.set([0, 90]);
+    }
 
     applyFilters();
 }

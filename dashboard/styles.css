@@ -77,7 +77,7 @@ body {
 }
 
 .control-group {
-    margin-bottom: 12px;
+    margin-bottom: 24px;
 }
 
 .control-group label {
@@ -456,6 +456,32 @@ select:focus {
     width: 50px;
     text-align: right;
     flex-shrink: 0;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-footer p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.github-link {
+    color: var(--text-secondary);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.github-link:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
 }
 
 @media (max-width: 768px) {
