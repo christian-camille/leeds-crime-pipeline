@@ -19,7 +19,7 @@ async function init() {
     }).addTo(map);
 
     try {
-        const response = await fetch('data/crime_data.json');
+        const response = await fetch(`data/crime_data.json?v=${new Date().getTime()}`);
         crimeData = await response.json();
 
         populateFilters();
@@ -75,16 +75,18 @@ function getFilterParams() {
 
 function filterPoints(params) {
     const typeIndex = params.crimeType === 'all' ? -1 : crimeData.t.indexOf(params.crimeType);
+    const hraIndex = crimeData.pd ? crimeData.pd.indexOf('HRA') : -1;
 
     return crimeData.p.filter(point => {
-        const [lat, lon, pType, pYear, pMonth, count, isCityCentre] = point;
+        const [lat, lon, pType, pYear, pMonth, count, isCityCentre, distIdx] = point;
 
         if (typeIndex !== -1 && pType !== typeIndex) {
             return false;
         }
 
-        if (params.excludeCityCentre && isCityCentre === 1) {
-            return false;
+        if (params.excludeCityCentre) {
+            if (isCityCentre === 1) return false;
+            if (hraIndex !== -1 && distIdx === hraIndex) return false;
         }
 
         if (pYear < params.yearStart || pYear > params.yearEnd) {
@@ -102,34 +104,7 @@ function filterPoints(params) {
     });
 }
 
-function filterWardData(params) {
-    const typeIndex = params.crimeType === 'all' ? -1 : crimeData.t.indexOf(params.crimeType);
 
-    return crimeData.wd.filter(point => {
-        const [ward, pType, pYear, pMonth, count] = point;
-
-        if (typeIndex !== -1 && pType !== typeIndex) {
-            return false;
-        }
-
-        if (params.excludeCityCentre && ward === crimeData.cc) {
-            return false;
-        }
-
-        if (pYear < params.yearStart || pYear > params.yearEnd) {
-            return false;
-        }
-
-        if (pYear === params.yearStart && pMonth < params.monthStart) {
-            return false;
-        }
-        if (pYear === params.yearEnd && pMonth > params.monthEnd) {
-            return false;
-        }
-
-        return true;
-    });
-}
 
 function applyFilters() {
     const params = getFilterParams();
@@ -170,7 +145,7 @@ function applyFilters() {
     }).addTo(map);
 
     updateStats(filteredPoints, params);
-    updateWardChart(params);
+    updateWardChart(filteredPoints);
 }
 
 function updateStats(points, params) {
@@ -183,16 +158,20 @@ function updateStats(points, params) {
         `${startMonthName} ${params.yearStart} - ${endMonthName} ${params.yearEnd}`;
 }
 
-function updateWardChart(params) {
-    const filteredWardData = filterWardData(params);
-
+function updateWardChart(points) {
     const wardTotals = {};
-    filteredWardData.forEach(point => {
-        const [ward, pType, pYear, pMonth, count] = point;
-        if (!wardTotals[ward]) {
-            wardTotals[ward] = 0;
+
+    points.forEach(point => {
+        const [lat, lon, pType, pYear, pMonth, count, isCityCentre, distIdx] = point;
+
+        const wardIdx = crimeData.dw[distIdx];
+        if (wardIdx !== undefined) {
+            const wardName = crimeData.w[wardIdx];
+            if (!wardTotals[wardName]) {
+                wardTotals[wardName] = 0;
+            }
+            wardTotals[wardName] += count;
         }
-        wardTotals[ward] += count;
     });
 
     const sortedWards = Object.entries(wardTotals)
