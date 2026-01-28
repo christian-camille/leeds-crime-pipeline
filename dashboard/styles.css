@@ -117,19 +117,55 @@ select:focus {
     box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-.range-inputs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.range-slider {
+    margin: 36px 12px 24px 12px;
+    height: 6px;
+    border-radius: 3px;
+    border: none;
+    box-shadow: none;
+    background: var(--bg-input);
 }
 
-.range-inputs select {
-    flex: 1;
+.noUi-connect {
+    background: var(--accent);
 }
 
-.range-separator {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
+.noUi-horizontal .noUi-handle {
+    width: 20px;
+    height: 20px;
+    right: -10px;
+    top: -8px;
+    border: 2px solid var(--accent);
+    background: var(--bg-card);
+    border-radius: 50%;
+    box-shadow: none;
+    cursor: grab;
+    transition: transform var(--transition), border-color var(--transition);
+}
+
+.noUi-horizontal .noUi-handle:hover {
+    background: var(--bg-input);
+}
+
+.noUi-horizontal .noUi-handle:active {
+    cursor: grabbing;
+    background: var(--accent);
+}
+
+.noUi-handle::before,
+.noUi-handle::after {
+    display: none;
+}
+
+.noUi-tooltip {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    font-size: 0.7rem;
+    font-family: var(--font-family);
+    padding: 4px 8px;
+    border-radius: 4px;
+    bottom: 24px;
 }
 
 .btn-primary,

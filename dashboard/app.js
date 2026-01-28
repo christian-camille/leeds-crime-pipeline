@@ -7,6 +7,9 @@ const MONTHS = [
     'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+let totalMonths = 0;
+let minDateTimestamp = 0;
+
 async function init() {
     map = L.map('map', {
         zoomControl: true,
@@ -43,32 +46,76 @@ function populateFilters() {
         crimeTypeSelect.appendChild(option);
     });
 
-    const yearStartSelect = document.getElementById('year-start');
-    const yearEndSelect = document.getElementById('year-end');
+    initSlider();
+}
 
-    crimeData.y.forEach(year => {
-        const optionStart = document.createElement('option');
-        optionStart.value = year;
-        optionStart.textContent = year;
-        yearStartSelect.appendChild(optionStart);
+function initSlider() {
+    const slider = document.getElementById('date-slider');
 
-        const optionEnd = document.createElement('option');
-        optionEnd.value = year;
-        optionEnd.textContent = year;
-        yearEndSelect.appendChild(optionEnd);
+    const startYear = crimeData.y[0];
+    const endYear = crimeData.y[crimeData.y.length - 1];
+    totalMonths = (endYear - startYear + 1) * 12;
+    minDateTimestamp = new Date(startYear, 0).getTime();
+
+    noUiSlider.create(slider, {
+        start: [0, totalMonths - 1],
+        connect: true,
+        step: 1,
+        range: {
+            'min': 0,
+            'max': totalMonths - 1
+        },
+        format: {
+            to: function (value) {
+                return Math.round(value);
+            },
+            from: function (value) {
+                return Math.round(value);
+            }
+        },
+        tooltips: {
+            to: function (value) {
+                return formatMonthYear(value);
+            }
+        }
     });
 
-    yearEndSelect.value = crimeData.y[crimeData.y.length - 1];
-    document.getElementById('month-end').value = '12';
+    slider.noUiSlider.on('update', function () {
+        applyFilters();
+    });
+}
+
+function formatMonthYear(monthIndex) {
+    const startYear = crimeData.y[0];
+    const totalMonthIndex = Math.round(monthIndex);
+
+    const yearOffset = Math.floor(totalMonthIndex / 12);
+    const month = totalMonthIndex % 12;
+
+    return `${MONTHS[month].substring(0, 3)} ${startYear + yearOffset}`;
+}
+
+function getDateFromIndex(index) {
+    const startYear = crimeData.y[0];
+    const yearOffset = Math.floor(index / 12);
+    const month = (index % 12) + 1;
+    const year = startYear + yearOffset;
+    return { year, month };
 }
 
 function getFilterParams() {
+    const slider = document.getElementById('date-slider');
+    const values = slider.noUiSlider.get();
+
+    const startDate = getDateFromIndex(parseInt(values[0]));
+    const endDate = getDateFromIndex(parseInt(values[1]));
+
     return {
         crimeType: document.getElementById('crime-type').value,
-        yearStart: parseInt(document.getElementById('year-start').value),
-        yearEnd: parseInt(document.getElementById('year-end').value),
-        monthStart: parseInt(document.getElementById('month-start').value),
-        monthEnd: parseInt(document.getElementById('month-end').value),
+        yearStart: startDate.year,
+        yearEnd: endDate.year,
+        monthStart: startDate.month,
+        monthEnd: endDate.month,
         excludeCityCentre: document.getElementById('exclude-city-centre').checked
     };
 }
@@ -201,15 +248,16 @@ function updateWardChart(points) {
 
 function resetFilters() {
     document.getElementById('crime-type').value = 'all';
-    document.getElementById('year-start').value = crimeData.y[0];
-    document.getElementById('year-end').value = crimeData.y[crimeData.y.length - 1];
-    document.getElementById('month-start').value = '01';
-    document.getElementById('month-end').value = '12';
     document.getElementById('exclude-city-centre').checked = false;
+
+    const slider = document.getElementById('date-slider');
+    slider.noUiSlider.set([0, totalMonths - 1]);
+
     applyFilters();
 }
 
-document.getElementById('apply-filters').addEventListener('click', applyFilters);
 document.getElementById('reset-filters').addEventListener('click', resetFilters);
+document.getElementById('crime-type').addEventListener('change', applyFilters);
+document.getElementById('exclude-city-centre').addEventListener('change', applyFilters);
 
 document.addEventListener('DOMContentLoaded', init);

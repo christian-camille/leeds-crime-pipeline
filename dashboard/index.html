@@ -8,6 +8,7 @@
     <meta name="description"
         content="Interactive heatmap visualization of crime data in Leeds, UK. Filter by crime type and date range.">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,47 +33,8 @@
                 </div>
 
                 <div class="control-group">
-                    <label>Year Range</label>
-                    <div class="range-inputs">
-                        <select id="year-start"></select>
-                        <span class="range-separator">to</span>
-                        <select id="year-end"></select>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label>Month Range</label>
-                    <div class="range-inputs">
-                        <select id="month-start">
-                            <option value="01">January</option>
-                            <option value="02">February</option>
-                            <option value="03">March</option>
-                            <option value="04">April</option>
-                            <option value="05">May</option>
-                            <option value="06">June</option>
-                            <option value="07">July</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
-                        <span class="range-separator">to</span>
-                        <select id="month-end">
-                            <option value="01">January</option>
-                            <option value="02">February</option>
-                            <option value="03">March</option>
-                            <option value="04">April</option>
-                            <option value="05">May</option>
-                            <option value="06">June</option>
-                            <option value="07">July</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
-                    </div>
+                    <label>Date Range</label>
+                    <div id="date-slider" class="range-slider"></div>
                 </div>
 
                 <div class="control-group toggle-group">
@@ -83,7 +45,6 @@
                     </label>
                 </div>
 
-                <button id="apply-filters" class="btn-primary">Apply Filters</button>
                 <button id="reset-filters" class="btn-secondary">Reset</button>
             </div>
 
@@ -119,6 +80,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
     <script src="app.js"></script>
 </body>
 
