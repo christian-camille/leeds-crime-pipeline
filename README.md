@@ -12,7 +12,7 @@ A complete ETL (Extract, Transform, Load) pipeline for collecting, processing, a
 
 - **Data Engineering**: Automated month-by-month API fetching with rate limiting, error handling, and incremental processing.
 - **Geospatial Processing**: Point-in-polygon validation using `Shapely` to ensure all records fall within Leeds administrative boundaries.
-- **Data Enrichment**: Batch geocoding via the `postcodes.io` API to append Ward Names and Postcode Districts.
+- **Data Enrichment**: Batch geocoding via `postcodes.io` and spatial joins with **Leeds City Council** data to append Ward Names, Postcode Districts, and Polling Districts.
 - **Dataset Normalisation**: Unified format across API and archive sources with consistent crime categorisation.
 - **Interactive Visualisation**: Web-based dashboard for exploring crime hotspots and temporal trends.
 
@@ -27,6 +27,7 @@ A complete ETL (Extract, Transform, Load) pipeline for collecting, processing, a
 | LSOA | Lower Super Output Area code and name |
 | Ward Name | Electoral ward (e.g., "Little London & Woodhouse") |
 | Postcode District | First part of postcode (e.g., "LS1") |
+| Polling District | Voting district code (e.g., "LWE") |
 | Outcome | Case outcome where available |
 
 ## Tech Stack
@@ -107,7 +108,7 @@ python src/process_api_data.py
 
 ```
 
-**4. Merge & Enrich** Consolidates all sources and appends Ward/Postcode metadata.
+**4. Merge & Enrich** Consolidates all sources and appends Ward/Postcode/Polling District metadata.
 
 ```bash
 python src/merge_datasets.py
@@ -191,6 +192,7 @@ pytest tests/ -v
 * **ONS Geoportal** - LSOA boundary data
 * **OpenStreetMap Nominatim** - Leeds administrative boundary
 * **Postcodes.io** - Postcode and ward lookup
+* **Leeds City Council MapServer** - Polling District boundaries
 
 ## Output
 
