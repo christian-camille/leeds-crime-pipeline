@@ -1,20 +1,20 @@
-# Leeds Crime Data Pipeline
+# Leeds Crime Data 
 
-A complete ETL (Extract, Transform, Load) pipeline for collecting, processing, and enriching street-level crime data for the Leeds metropolitan area. The pipeline aggregates data from the UK Police API and historical archives, producing a comprehensive dataset spanning **January 2018 to October 2025** with over **900,000 crime records**.
+A comprehensive geospatial intelligence platform for the Leeds metropolitan area. This project combines a robust ETL pipeline with an interactive web dashboard to visualise over **900,000 crime records** spanning **2018–2025**. It integrates data from the **UK Police API**, **Leeds City Council**, and **ONS**, providing hyper-local insights through heatmaps, ward-level choropleths, and temporal trend analysis.
 
 <p align="center">
-  <img src="https://files.catbox.moe/7a1kyy.png" width="900" alt="Leeds Crime Heatmap 2018-2025">
+  <img src="https://user.fm/files/v2-77083e47adabc7343a4c878338cf8497/Screenshot%202026-01-28%20154135.png" width="900" alt="Leeds Crime Heatmap 2018-2025">
   <br>
-  <b>Figure 1:</b> <i>Geospatial density of 900,000+ crime records across the Leeds metropolitan area.</i>
+  <b>Figure 1:</b> <i>Interactive dashboard showing crime density across Leeds (2018-2025).</i>
 </p>
 
 ## Project Highlights
 
-- **Data Engineering**: Automated month-by-month API fetching with rate limiting, error handling, and incremental processing.
-- **Geospatial Processing**: Point-in-polygon validation using `Shapely` to ensure all records fall within Leeds administrative boundaries.
-- **Data Enrichment**: Batch geocoding via `postcodes.io` and spatial joins with **Leeds City Council** data to append Ward Names, Postcode Districts, and Polling Districts.
-- **Dataset Normalisation**: Unified format across API and archive sources with consistent crime categorisation.
-- **Interactive Visualisation**: Web-based dashboard for exploring crime hotspots and temporal trends.
+- **Interactive Dashboard**: A responsive web application featuring dual-mode visualisation (Heatmap & Ward Choropleth), dynamic filtering, and real-time statistics.
+- **Robust ETL Pipeline**: Automated ingestion system that handles incremental updates, rate limiting, and historical data merging.
+- **Geospatial Intelligence**: Precise point-in-polygon validation (`Shapely`) and batch geocoding (`postcodes.io`) to enrich every crime record with administrative boundaries.
+- **Data Normalisation**: Unified schema across disparate sources (API vs Archive) to ensure consistent categorisation and analysis.
+- **Optimised Performance**: Pre-aggregated data structures (`JSON`) to ensure sub-second rendering of nearly a million data points in the browser.
 
 ## Dataset Features
 
@@ -32,13 +32,16 @@ A complete ETL (Extract, Transform, Load) pipeline for collecting, processing, a
 
 ## Tech Stack
 
-- **Python 3.12** - Core language
-- **Pandas** - Data manipulation and analysis
-- **Shapely** - Geometric operations and spatial filtering
-- **Requests** - API interactions
-- **tqdm** - Progress visualisation
-- **NumPy** - Numerical operations
-- **pytest** - Testing framework
+### Data Pipeline
+- **Python 3.12** - Core ETL logic
+- **Pandas & NumPy** - High-performance data manipulation
+- **Shapely** - Geospatial operations and polygon validation
+- **Requests** - Robust API integration
+- **Pytest** - Automated testing suite
+
+
+
+
 
 ## Installation
 
@@ -116,14 +119,29 @@ python src/enrich_data.py
 
 ```
 
+**5. Fetch Boundaries** Retrieves and processes official Leeds ward boundaries for the map.
+
+```bash
+python src/fetch_wards.py
+
+```
+
+**6. Prepare Dashboard** transforming the processed CSV into optimised JSON for the web interface.
+
+```bash
+python src/prepare_dashboard_data.py
+
+```
+
 ## Interactive Dashboard
 
-The project includes a lightweight, interactive dashboard to visualise the crime data. It uses **Leaflet.js** for mapping and offers dynamic filtering by crime type, date range, and location.
+The dashboard is the centrepiece of this project, offering a high-performance interface for exploring 7+ years of crime data. Built with **Leaflet.js** and **noUiSlider**, it leverages optimised GeoJSON layers to deliver smooth transitions between granular heatmaps and administrative ward views, all within the browser.
 
 ### Features
 * **Heatmap Visualisation**: Dynamic density map of crime hotspots.
 * **Temporal Filtering**: Analyse trends over specific years and months.
 * **Category Filtering**: Isolate specific crime types (e.g., "Burglary").
+* **Choropleth Map**: Toggle between heatmap and ward-level density views.
 * **Ward Breakdown**: Top 5 wards by crime count for the selected period.
 
 ### Running the Dashboard
@@ -158,7 +176,9 @@ leeds-crimes/
 │   ├── filter_leeds_locations.py # Geospatial filtering
 │   ├── assign_lsoa.py          # LSOA assignment
 │   ├── enrich_data.py          # Ward/Postcode enrichment
-│   └── patch_enrichment.py     # Enrichment gap-filling
+│   ├── patch_enrichment.py     # Enrichment gap-filling
+│   ├── fetch_wards.py          # Ward boundary collection
+│   └── prepare_dashboard_data.py # Dashboard data generation
 ├── tests/
 │   ├── test_data_sources.py    # API availability tests
 │   ├── test_boundary.py        # Leeds polygon validation
@@ -196,9 +216,15 @@ pytest tests/ -v
 
 ## Output
 
-The final dataset is exported to `data/processed/leeds_street_combined.csv`. It contains **~906,000 records** with **100% coverage** for Ward Names and Postcode Districts, making it ready for immediate exploratory data analysis (EDA).
+The pipeline produces two primary artifacts:
+1. **`data/processed/leeds_street_combined.csv`**: The master dataset containing **~906,000 records** with 100% Ward/Postcode coverage, ideal for deep analysis (EDA) or ML modelling.
+2. **`dashboard/data/crime_data.json`**: An optimised, minified structure containing pre-aggregated indices and spatial coordinates, powering the real-time web dashboard.
 
 ## License
 
-This project is for educational and portfolio purposes. Crime data is sourced from the UK Police API under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+This project is open-source and available under the **MIT License**.
+
+
+- **Crime Data**: Sourced from the [UK Police API](https://data.police.uk/docs/) under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+- **Boundary Data**: Contains OS data © Crown copyright and database right 2024.
 
