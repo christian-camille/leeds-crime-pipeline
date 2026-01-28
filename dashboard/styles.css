@@ -618,3 +618,63 @@ select:focus {
 .btn-link:hover {
     color: #a78bfa;
 }
+
+.toggle-buttons {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 2px;
+    margin-top: 8px;
+}
+
+.view-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.view-btn.active {
+    background: var(--accent);
+    color: white;
+    font-weight: 500;
+}
+
+.info {
+    padding: 12px;
+    font-family: var(--font-family);
+    background: var(--bg-card);
+    background: rgba(22, 22, 30, 0.9);
+    box-shadow: var(--shadow);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    backdrop-filter: blur(10px);
+}
+
+.info h4 {
+    margin: 0 0 8px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.info b {
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.leaflet-interactive:focus {
+    outline: none !important;
+}
