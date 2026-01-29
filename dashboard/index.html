@@ -112,6 +112,24 @@
         </div>
     </div>
 
+    <div id="ward-details-modal" class="modal hidden">
+        <div class="modal-content details-modal">
+            <div class="modal-header">
+                <h2 id="ward-details-title">Ward Details</h2>
+                <button class="close-modal-details">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="ward-stats-grid" id="ward-stats-container">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="ward-chart-section">
+                    <h4>Monthly Trend (Last 24 Months)</h4>
+                    <div id="ward-sparkline" class="sparkline-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>

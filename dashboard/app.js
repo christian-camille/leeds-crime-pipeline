@@ -335,8 +335,8 @@ function updateChoropleth(points) {
     function highlightFeature(e) {
         const layer = e.target;
         layer.setStyle({
-            weight: 5,
-            color: '#666',
+            weight: 4,
+            color: '#6366f1',
             dashArray: '',
             fillOpacity: 0.7
         });
@@ -355,7 +355,8 @@ function updateChoropleth(points) {
             mouseover: highlightFeature,
             mouseout: resetHighlight,
             click: (e) => {
-                L.DomEvent.stopPropagation(e); // Prevent map/layer click events from triggering selection boxes
+                L.DomEvent.stopPropagation(e);
+                showWardDetails(feature.properties.WARD_NAME);
             }
         });
         const count = wardCounts[feature.properties.WARD_NAME] || 0;
@@ -531,5 +532,140 @@ function setMapMode(mode) {
 
     applyFilters();
 }
+
+
+// Ward Details Logic
+function showWardDetails(wardName) {
+    const wardIdx = crimeData.w.indexOf(wardName);
+    if (wardIdx === -1) return;
+
+    // Filter points for this ward only, ignoring current map filters for accurate history
+    const typeIndex = document.getElementById('crime-type').value === 'all'
+        ? -1
+        : crimeData.t.indexOf(document.getElementById('crime-type').value);
+
+    // Get strictly this ward's data, optionally filtered by crime type
+    // Ignore date filters to show full history trend
+    const wardPoints = crimeData.p.filter(p => {
+        const pType = p[2];
+        const pWardIdx = p[8];
+        return pWardIdx === wardIdx && (typeIndex === -1 || pType === typeIndex);
+    });
+
+    // Calculate Monthly Totals
+    const monthlyCounts = {};
+    wardPoints.forEach(p => {
+        const [, , , year, month, count] = p;
+        const key = `${year}-${String(month).padStart(2, '0')}`;
+        monthlyCounts[key] = (monthlyCounts[key] || 0) + count;
+    });
+
+    // Sort by date YYYY-MM
+    const sortedMonths = Object.keys(monthlyCounts).sort();
+
+    // Calculate Stats
+    // Last 3 Months Sum
+    // Find the latest valid month in the dataset to anchor "now"
+    const lastMonthKey = sortedMonths[sortedMonths.length - 1];
+    if (!lastMonthKey) return; // No data
+
+    const [lastYear, lastMonth] = lastMonthKey.split('-').map(Number);
+
+    // Function to get previous N months count
+    function getSumForPeriod(endYear, endMonth, monthsBack) {
+        let sum = 0;
+        let y = endYear;
+        let m = endMonth;
+
+        for (let i = 0; i < monthsBack; i++) {
+            const key = `${y}-${String(m).padStart(2, '0')}`;
+            sum += monthlyCounts[key] || 0;
+            m--;
+            if (m < 1) {
+                m = 12;
+                y--;
+            }
+        }
+        return sum;
+    }
+
+    const last3Months = getSumForPeriod(lastYear, lastMonth, 3);
+
+    // Previous 3 months (shift back 3 months)
+    let prevY = lastYear;
+    let prevM = lastMonth - 3;
+    while (prevM < 1) { prevM += 12; prevY--; }
+
+    const prev3Months = getSumForPeriod(prevY, prevM, 3);
+
+    const trendDiff = last3Months - prev3Months;
+    const trendPct = prev3Months > 0 ? ((trendDiff / prev3Months) * 100).toFixed(1) : 0;
+
+    const last12Months = getSumForPeriod(lastYear, lastMonth, 12);
+
+    // Render Modal Content
+    document.getElementById('ward-details-title').textContent = wardName;
+
+    const statsContainer = document.getElementById('ward-stats-container');
+
+    const trendClass = trendDiff > 0 ? 'trend-negative' : 'trend-positive'; // More crimes = negative result
+    const trendIcon = trendDiff > 0 ? '▲' : '▼';
+    const trendColor = trendDiff > 0 ? 'trend-up' : 'trend-down';
+
+    statsContainer.innerHTML = `
+        <div class="stat-box">
+            <h3>Yearly Total</h3>
+            <div class="value">${last12Months.toLocaleString()}</div>
+            <div class="sub-value">Last 12 Months</div>
+        </div>
+        <div class="stat-box ${trendClass}">
+            <h3>3-Month Trend</h3>
+            <div class="value">${last3Months.toLocaleString()}</div>
+            <div class="sub-value ${trendColor}">
+                ${trendIcon} ${Math.abs(trendPct)}% vs prev.
+            </div>
+        </div>
+    `;
+
+    // Render Sparkline (Last 24 months MAX)
+    const sparkContainer = document.getElementById('ward-sparkline');
+    sparkContainer.innerHTML = '';
+
+    // Generate last 24 months keys
+    const sparkKeys = [];
+    let currY = lastYear;
+    let currM = lastMonth;
+
+    for (let i = 0; i < 24; i++) {
+        sparkKeys.unshift(`${currY}-${String(currM).padStart(2, '0')}`);
+        currM--;
+        if (currM < 1) { currM = 12; currY--; }
+    }
+
+    const sparkCounts = sparkKeys.map(k => monthlyCounts[k] || 0);
+    const maxSpark = Math.max(...sparkCounts, 1);
+
+    sparkKeys.forEach((key, idx) => {
+        const count = monthlyCounts[key] || 0;
+        const barHeight = (count / maxSpark) * 100;
+
+        const bar = document.createElement('div');
+        bar.className = 'spark-bar';
+        bar.style.height = `${barHeight}%`;
+        bar.title = `${key}: ${count} crimes`;
+        sparkContainer.appendChild(bar);
+    });
+
+    document.getElementById('ward-details-modal').classList.remove('hidden');
+}
+
+function closeWardDetails() {
+    document.getElementById('ward-details-modal').classList.add('hidden');
+}
+
+document.querySelector('.close-modal-details').addEventListener('click', closeWardDetails);
+document.getElementById('ward-details-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'ward-details-modal') closeWardDetails();
+});
 
 document.addEventListener('DOMContentLoaded', init);
